@@ -8,8 +8,8 @@
  */
 class {model_name}_model extends BF_Model {
 
-	protected $table 		= '{table_name}';
-	protected $key			= '{key}';
+	protected $table 			= '{table_name}';
+	protected $key				= '{key}';
 	protected $set_created		= {set_created};
 	protected $set_modified		= {set_modified};
 	protected $date_format		= 'datetime';

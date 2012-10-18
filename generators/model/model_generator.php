@@ -81,6 +81,7 @@ class Model_Generator extends BF_Generator {
 		$tpl = str_replace('{table_name}', $table, $tpl);
 		$tpl = str_replace('{set_created}', $set_created, $tpl);
 		$tpl = str_replace('{set_modified}', $set_modified, $tpl);
+		$tpl = str_replace('{key}', 'id', $tpl);
 
 		$file = $this->determine_files($module, $params);
 		$file = $file[0];

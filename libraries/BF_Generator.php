@@ -179,6 +179,10 @@ class BF_Generator {
 		{
 			$data['preview'] = $preview;
 		}
+		if (isset($status))
+		{
+			$data['status'] = $status;
+		}
 
 		// View file is expected to be at views/index.php
 		$view = $this->ci->load->view('gen_form', $data, true);
@@ -460,6 +464,34 @@ class BF_Generator {
 		$tpl = str_replace('{generate_user}', $uname, $tpl);
 
 		return $tpl;
+	}
+
+	//--------------------------------------------------------------------
+
+	public function write_file($path, $filename, $content='')
+	{
+		$this->ci->load->helper('file');
+
+		// Does the path exist?
+		if (!is_dir($path))
+		{
+			mkdir($path, 0755, true);
+		}
+
+		if (is_file($path . $filename))
+		{
+			$results[$path . $filename] = 'EXISTS';
+		}
+		else if (write_file($path . $filename, $content))
+		{
+			$results[$path . $filename] = 'CREATED';
+		}
+		else
+		{
+			$results[$path . $filename] = 'FAILED';
+		}
+
+		return $results;
 	}
 
 	//--------------------------------------------------------------------

@@ -31,6 +31,25 @@
 			&nbsp;&nbsp;or&nbsp;&nbsp;
 			<a href="<?php echo site_url(SITE_AREA .'/developer/builder/generate') ?>">Cancel</a>
 		</div>
+
+	<?php elseif (isset($status)) :?>
+
+		<h3>Generation Results</h3>
+
+		<pre><?php
+			foreach ($status as $file => $success)
+			{
+				if ($success == 'success')
+					echo 'CREATED '. $file ."\n";
+				else
+					echo 'FAILED '. $file ."\n";
+			}
+		?></pre>
+
+		<div class="form-actions">
+			<a href="<?php echo site_url(SITE_AREA .'/developer/builder/generate') ?>">Back to Code Builder</a>
+		</div>
+
 	<?php else: ?>
 		<div class="form-actions">
 			<input type="submit" name="form-submit-preview" class="btn btn-primary" value="Preview" />

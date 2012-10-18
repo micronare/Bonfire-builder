@@ -85,7 +85,9 @@ class Model_Generator extends BF_Generator {
 		$file = $this->determine_files($module, $params);
 		$file = $file[0];
 
-		die('<pre>'. print_r($file, true));
+		$results = $this->write_file($file['path'], $file['filename'], $tpl);
+
+		return $results;
 	}
 
 	//--------------------------------------------------------------------

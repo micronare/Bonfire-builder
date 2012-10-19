@@ -82,13 +82,38 @@ class Developer extends Admin_Controller {
 
     //--------------------------------------------------------------------
 
-    public function generate($gen_name)
+    public function generate($gen_name='')
     {
         $class_name = $this->load_generator($gen_name);
         $class = new $class_name();
 
         Template::set('content', $class->render());
         Template::render('two_left');
+    }
+
+    //--------------------------------------------------------------------
+
+    //--------------------------------------------------------------------
+    // !FORM HELPERS
+    //--------------------------------------------------------------------
+
+    public function render_db_to_form($table=null)
+    {
+        if (empty($table))
+        {
+            die('No table selected.');
+        }
+
+        $fields = $this->db->field_data($table);
+
+        $data = array(
+            'table'     => $table,
+            'fields'    => $fields
+        );
+
+        echo $this->load->view('builder/developer/_db_to_form', $data, true);
+
+        die();
     }
 
     //--------------------------------------------------------------------

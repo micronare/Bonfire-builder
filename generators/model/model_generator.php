@@ -23,7 +23,7 @@ class Model_Generator extends BF_Generator {
 			),
 			// database table
 			'table'		=> array(
-				'type'			=> 'input',
+				'type'			=> 'db_table',
 				'default'		=> '',
 				'help'			=> 'The name of the database table to be used.',
 				'display_name'	=> 'DB Table Name',

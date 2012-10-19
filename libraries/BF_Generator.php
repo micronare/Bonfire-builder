@@ -89,6 +89,12 @@ class BF_Generator {
 	 */
 	protected $ci;
 
+	/**
+	 * The core database tables that we can ignore...
+	 *
+	 */
+	protected $core_tables = array('activities', 'email_queue', 'login_attempts', 'permissions', 'role_permissions', 'roles', 'schema_version', 'sessions', 'settings', 'user_cookies', 'user_meta', 'users');
+
 	//--------------------------------------------------------------------
 
 	public function __construct()
@@ -363,6 +369,49 @@ class BF_Generator {
 					$form 	.= '</div>';
 					break;
 
+				// List of database tables
+				case 'db_table':
+					$tables = $this->ci->db->list_tables();
+					$prefix = $this->ci->db->dbprefix;
+
+					$form .= '<div class="control-group">';
+					$form .= '<label class="control-label">Database Table</label>';
+					$form .= '<div class="controls">';
+					$form .= "<select name='{$field}' class='db_table_select'><option value=''></option>";
+
+					// App-specific tables
+					$form .= '<optgroup label="Application Tables">';
+					foreach ($tables as $table)
+					{
+						if (in_array(str_replace($prefix, '', $table), $this->core_tables))
+						{
+							continue;
+						}
+						$table = str_replace($prefix, '', $table);
+						$form .= "<option value='$table'>$table</option>";
+					}
+					$form .= '</optgroup>';
+
+					// Core tables
+					$form .= '<optgroup label="Core Tables">';
+					foreach ($this->core_tables as $table)
+					{
+						$table = str_replace($prefix, '', $table);
+						$form .= "<option value='$table'>$table</option>";
+					}
+					$form .= '</optgroup>';
+
+					$form .= '</select>';
+					$form .= "<span class='help-block'>{$options['help']}</span>";
+					$form .= '</div>';
+
+					// Allow for table details
+					$form .= '<div id="db_table_form_details"></div>';
+
+					$form .= '</div>';
+
+					break;
+
 				case 'input':
 					$required = strpos($options['rules'], 'required') !== false ? 'required' : '';
 					$error = form_error($field) ? 'error' : '';
@@ -393,6 +442,8 @@ class BF_Generator {
 					break;
 			}
 		}
+
+		Assets::add_module_js('builder', 'generators.js');
 
 		return $form;
 	}
@@ -482,7 +533,7 @@ class BF_Generator {
 		{
 			$results[$path . $filename] = 'EXISTS';
 		}
-		else if (write_file($path . $filename, $content))
+		else if (write_file($path . $filename, $content, 0644))
 		{
 			$results[$path . $filename] = 'CREATED';
 		}

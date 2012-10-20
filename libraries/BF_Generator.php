@@ -216,7 +216,7 @@ class BF_Generator {
 		$preview = '<table class="preview"><tbody>';
 
 		foreach ($files as $file) {
-			$preview .= "<tr><td>{$file['path']}{$file['filename']}</td>";
+			$preview .= "<tr><td>{$file['path']}<span style='color:yellow'>{$file['filename']}</span></td>";
 
 			// does the file exist?
 			if (is_file($file['path'] . $file['filename']))
@@ -262,7 +262,7 @@ class BF_Generator {
 		// All we're determing here is determining the file path/name
 		foreach ($this->files as $name_format => $options)
 		{
-			$name = '';
+			$name = $name_format;
 
 			/*
 				Time to do some field replacement in our
@@ -279,6 +279,16 @@ class BF_Generator {
 					$name = strtolower( str_replace('{'. $field .'}', $params[$field], $name_format) );
 					break;
 				}
+			}
+
+			/*
+				Alternatively, check for the {context} tag and replace it in the name
+				for context controllers.
+			 */
+			if ($this->ci->input->post('context'))
+			{
+				$name = str_replace('{context}', $this->ci->input->post('context'), $name);
+				$options['folder'] = str_replace('{context}', $this->ci->input->post('context'), $options['folder']);
 			}
 
 			$path = str_replace('application/', '', APPPATH) .'modules/'. $module .'/'. $options['folder'] .'/';
@@ -371,7 +381,8 @@ class BF_Generator {
 					$form .= "<select name='{$field}'><option value=''></option>";
 					foreach ($contexts as $context)
 					{
-						$form .= '<option value="'. strtolower($context) .'">'. ucwords($context) .'</option>';
+						$selected = $selected == $context ? 'selected="selected"' : '';
+						$form .= '<option value="'. strtolower($context) ."\" $selected>". ucwords($context) .'</option>';
 					}
 					$form .= '</select>';
 					$form .= "<span class='help-block'>{$options['help']}</span>";
@@ -396,6 +407,8 @@ class BF_Generator {
 					// to the
 					$form_type = isset($options['form_type']) ? $options['form_type'] : '';
 
+					$selected = $selected == $this->ci->input->post('table') ? 'selected="selected"' : '';
+
 					$form .= '<div class="control-group">';
 					$form .= '<label class="control-label">Database Table</label>';
 					$form .= '<div class="controls">';
@@ -410,7 +423,7 @@ class BF_Generator {
 							continue;
 						}
 						$table = str_replace($prefix, '', $table);
-						$form .= "<option value='$table'>$table</option>";
+						$form .= "<option value='$table' $selected>$table</option>";
 					}
 					$form .= '</optgroup>';
 
@@ -419,7 +432,7 @@ class BF_Generator {
 					foreach ($this->core_tables as $table)
 					{
 						$table = str_replace($prefix, '', $table);
-						$form .= "<option value='$table'>$table</option>";
+						$form .= "<option value='$table $selected'>$table</option>";
 					}
 					$form .= '</optgroup>';
 

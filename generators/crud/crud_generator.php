@@ -31,4 +31,28 @@ class Crud_Generator extends BF_Generator {
 		),
 	);
 
+	// The files to create
+	protected $files = array(
+		'{context}.php'	=> array(
+			'template'	=> 'crud_controller',
+			'folder'	=> 'controllers'
+		),
+		'index.php'	=> array(
+			'template'	=> 'crud_index',
+			'folder'	=> 'views/{context}'
+		),
+		'create.php'	=> array(
+			'template'	=> 'crud_create',
+			'folder'	=> 'views/{context}'
+		),
+		'edit.php'	=> array(
+			'template'	=> 'crud_edit',
+			'folder'	=> 'views/{context}'
+		),
+		'delete.php'	=> array(
+			'template'	=> 'crud_delete',
+			'folder'	=> 'views/{context}'
+		),
+	);
+
 }

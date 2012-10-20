@@ -14,6 +14,13 @@ class Crud_Generator extends BF_Generator {
 
 	// Our form fields and validation needs
 	protected $fields	= array(
+		// Context
+		'context'	=> array(
+			'type'		=> 'context',
+			'help'		=> 'What context does this controller belong to?',
+			'display_name'	=> 'Context',
+			'rules'			=> 'required|trim|strip_tags|xss_clean'
+		),
 		// Database Table
 		'table'		=> array(
 			'type'		=> 'db_table',

@@ -361,6 +361,24 @@ class BF_Generator {
 
 			switch ($options['type'])
 			{
+				// Display the list of contexts - does not allow creating new ones.
+				case 'context':
+					$contexts = $this->ci->config->item('contexts');
+
+					$form .= '<div class="control-group">';
+					$form .= '<label class="control-label">'. $options['display_name'] .'</label>';
+					$form .= '<div class="controls">';
+					$form .= "<select name='{$field}'><option value=''></option>";
+					foreach ($contexts as $context)
+					{
+						$form .= '<option value="'. strtolower($context) .'">'. ucwords($context) .'</option>';
+					}
+					$form .= '</select>';
+					$form .= "<span class='help-block'>{$options['help']}</span>";
+					$form .= '</div></div>';
+					break;
+
+				// Display the current database prefix
 				case 'db_prefix':
 					$prefix  = $this->ci->db->dbprefix;
 					$form 	.= '<div class="control-group">';

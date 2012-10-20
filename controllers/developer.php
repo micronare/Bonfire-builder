@@ -97,6 +97,13 @@ class Developer extends Admin_Controller {
     // !FORM HELPERS
     //--------------------------------------------------------------------
 
+    /**
+     * Displays the fields in a database table for selecting input
+     * types when it's rendered. Intended for use in an AJAX situation.
+     *
+     * @param  string $table The name of the table to render
+     * @return void
+     */
     public function render_db_to_form($table=null)
     {
         if (empty($table))

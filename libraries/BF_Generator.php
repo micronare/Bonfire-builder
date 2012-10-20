@@ -374,10 +374,14 @@ class BF_Generator {
 					$tables = $this->ci->db->list_tables();
 					$prefix = $this->ci->db->dbprefix;
 
+					// Used as the class for the select that attaches
+					// to the
+					$form_type = isset($options['form_type']) ? $options['form_type'] : '';
+
 					$form .= '<div class="control-group">';
 					$form .= '<label class="control-label">Database Table</label>';
 					$form .= '<div class="controls">';
-					$form .= "<select name='{$field}' class='db_table_select'><option value=''></option>";
+					$form .= "<select name='{$field}' class='{$form_type}'><option value=''></option>";
 
 					// App-specific tables
 					$form .= '<optgroup label="Application Tables">';

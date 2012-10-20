@@ -19,7 +19,8 @@ class Crud_Generator extends BF_Generator {
 			'type'		=> 'db_table',
 			'help'		=> 'The existing Database table to use.',
 			'display_name'	=> 'DB Table Name',
-			'rules'			=> 'required|trim|strip_tags|xss_clean'
+			'rules'			=> 'required|trim|strip_tags|xss_clean',
+			'form_type'		=> 'db_table_select'
 		),
 	);
 

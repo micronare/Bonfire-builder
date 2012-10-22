@@ -16,12 +16,9 @@
 		<h3>Generation Results</h3>
 
 		<pre><?php
-			foreach ($status as $file => $success)
+			foreach ($status[0] as $file => $report)
 			{
-				if ($success == 'success')
-					echo 'CREATED '. $file ."\n";
-				else
-					echo 'FAILED '. $file ."\n";
+				echo strtoupper($report). "\t" . $file ."\n";
 			}
 		?></pre>
 

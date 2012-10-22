@@ -55,4 +55,20 @@ class Crud_Generator extends BF_Generator {
 		),
 	);
 
+	//--------------------------------------------------------------------
+
+	public function get_vars($params)
+	{
+		$vars = array(
+			'module'		=> $params['module'],
+			'context'		=> $params['context'],
+			'context_ucf'	=> ucfirst($params['context']),
+			'extend'		=> $params['context'] != 'public' ? 'Admin_Controller' : 'Front_Controller',
+		);
+
+		return $vars;
+	}
+
+	//--------------------------------------------------------------------
+
 }

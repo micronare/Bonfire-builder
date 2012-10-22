@@ -259,9 +259,8 @@ class BF_Generator {
 
 			$tpl = $this->replace_vars($tpl, $vars);
 
-			$results[] = $this->write_file(realpath($file['path']) .'/', $file['filename'], $tpl);
+			$results[] = $this->write_file($file['path'], $file['filename'], $tpl);
 		}
-		die('<pre>'. print_r($results, true));
 
 		return $results;
 	}
@@ -316,7 +315,7 @@ class BF_Generator {
 		{
 			return $files;
 		}
-
+//die('<pre>'. print_r($this->files, true));
 		// All we're determing here is determining the file path/name
 		foreach ($this->files as $name_format => $options)
 		{
@@ -617,19 +616,29 @@ class BF_Generator {
 	{
 		$this->ci->load->helper('file');
 
+		$exists = is_file($path . $filename);
+
 		// Does the path exist?
 		if (!is_dir($path))
 		{
 			mkdir($path, 0755, true);
 		}
-
+/*
 		if (is_file($path . $filename))
 		{
 			$results[$path . $filename] = 'EXISTS';
 		}
-		else if (write_file($path . $filename, $content))
+ */
+		else if (write_file($path . $filename, $content, 'w'))
 		{
-			$results[$path . $filename] = 'CREATED';
+			if ($exists)
+			{
+				$results[$path . $filename] = 'OVERWROTE';
+			}
+			else
+			{
+				$results[$path . $filename] = 'CREATED';
+			}
 		}
 		else
 		{

@@ -58,37 +58,26 @@ class Model_Generator extends BF_Generator {
 	//--------------------------------------------------------------------
 
 	/**
-	 * Handles the actual generation of the file(s);
+	 * Returns the variables that will be used and replaced throughout
+	 * the generation process.
 	 *
 	 * @param  array $params The params derived from the form
 	 *
 	 * @return [type]         [description]
 	 */
-	public function generate($params)
+	public function get_vars($params)
 	{
-		$module 		= $params['module'];
-		$model_name 	= isset($params['name']) ? $params['name'] : '';
-		$table 			= isset($params['table']) ? $params['table'] : '';
-		$set_created	= isset($params['set_created']) ? 'TRUE' : 'FALSE';
-		$set_modified	= isset($params['set_modified']) ? 'TRUE' : 'FALSE';
+		$vars = array(
+			'module'		=> $params['module'],
+			'model_name'	=> isset($params['name']) ? $params['name'] : '',
+			'table'			=> isset($params['table']) ? $params['table'] : '',
+			'set_created'	=> isset($params['set_created']) ? 'TRUE' : 'FALSE',
+			'set_modified'	=> isset($params['set_modified']) ? 'TRUE' : 'FALSE',
+			'table_name'	=> isset($params['table']) ? $params['table'] : '',
+			'key'			=> 'id',
+		);
 
-		$tpl = $this->load_template('model', 'model');
-
-		/*
-			Set our custom values in the template
-		 */
-		$tpl = str_replace('{model_name}', $model_name, $tpl);
-		$tpl = str_replace('{table_name}', $table, $tpl);
-		$tpl = str_replace('{set_created}', $set_created, $tpl);
-		$tpl = str_replace('{set_modified}', $set_modified, $tpl);
-		$tpl = str_replace('{key}', 'id', $tpl);
-
-		$file = $this->determine_files($module, $params);
-		$file = $file[0];
-
-		$results = $this->write_file($file['path'], $file['filename'], $tpl);
-
-		return $results;
+		return $vars;
 	}
 
 	//--------------------------------------------------------------------

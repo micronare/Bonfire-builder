@@ -238,9 +238,67 @@ class BF_Generator {
 
 	//--------------------------------------------------------------------
 
+	protected function generate($params)
+	{
+		// We need to retrieve an array of values from
+		// the generator of info to replace.
+		$vars = $this->get_vars($params);
+
+		$files = $this->determine_files($params['module'], $params);
+
+		$results = array();
+
+		// Now, loop through each of our files, rendering each one
+		// in turn.
+		foreach ($files as $file)
+		{
+			// Replaces info in filename with any of the generator vars.
+			$filename = $this->replace_vars($file['filename'], $vars);
+
+			$tpl = $this->load_template($file['template'], $this->name);
+
+			$tpl = $this->replace_vars($tpl, $vars);
+
+			$results[] = $this->write_file(realpath($file['path']) .'/', $file['filename'], $tpl);
+		}
+		die('<pre>'. print_r($results, true));
+
+		return $results;
+	}
+
+	//--------------------------------------------------------------------
+
 	//--------------------------------------------------------------------
 	// !Private Methods
 	//--------------------------------------------------------------------
+
+	/**
+	 * Replaces any existence of {var} within the given string.
+	 *
+	 * @param  string $str  The string to replace the vars in
+	 * @param  array $vars An array of name/value pairs to replace in $str.
+	 *
+	 * @access private
+	 *
+	 * @return string The modified string.
+	 */
+	private function replace_vars($str, $vars)
+	{
+		if (!is_array($vars) || (is_array($vars) && !count($vars)) )
+		{
+			return $str;
+		}
+
+		foreach ($vars as $key => $value)
+		{
+			$str = str_ireplace('{'. $key .'}', $value, $str);
+		}
+
+		return $str;
+	}
+
+	//--------------------------------------------------------------------
+
 
 	/**
 	 * Builds an array of filenames with paths, based on the $files array.
@@ -295,7 +353,8 @@ class BF_Generator {
 
 			$files[] = array(
 				'filename'	=> $name,
-				'path'		=> $path
+				'path'		=> $path,
+				'template'	=> $options['template']
 			);
 		}
 
@@ -568,7 +627,7 @@ class BF_Generator {
 		{
 			$results[$path . $filename] = 'EXISTS';
 		}
-		else if (write_file($path . $filename, $content, 0644))
+		else if (write_file($path . $filename, $content))
 		{
 			$results[$path . $filename] = 'CREATED';
 		}

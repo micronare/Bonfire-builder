@@ -407,7 +407,7 @@ class BF_Generator {
 					// to the
 					$form_type = isset($options['form_type']) ? $options['form_type'] : '';
 
-					$selected = $selected == $this->ci->input->post('table') ? 'selected="selected"' : '';
+					$selected = $this->ci->input->post('table') ? 'selected="selected"' : '';
 
 					$form .= '<div class="control-group">';
 					$form .= '<label class="control-label">Database Table</label>';
@@ -432,7 +432,7 @@ class BF_Generator {
 					foreach ($this->core_tables as $table)
 					{
 						$table = str_replace($prefix, '', $table);
-						$form .= "<option value='$table $selected'>$table</option>";
+						$form .= "<option value='$table' $selected>$table</option>";
 					}
 					$form .= '</optgroup>';
 

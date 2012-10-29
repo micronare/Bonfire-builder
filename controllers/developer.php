@@ -115,7 +115,8 @@ class Developer extends Admin_Controller {
 
         $data = array(
             'table'     => $table,
-            'fields'    => $fields
+            'fields'    => $fields,
+            'allowed_rules'	=> array('required', 'trim', 'alpha', 'alpha_numeric', 'alpha_dash', 'numeric', 'integer', 'decimal', 'is_natrual', 'is_natural_no_zero', 'valid_email', 'valid_ip', 'prep_url', 'prep_for_form', 'strip_img_tags', 'strip_tags', 'encode_php_tags', 'xss_clean')
         );
 
         echo $this->load->view('builder/developer/_db_to_form', $data, true);

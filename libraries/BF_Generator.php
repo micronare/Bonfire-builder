@@ -88,6 +88,15 @@ class BF_Generator {
 	 * @var Object
 	 */
 	protected $ci;
+	
+	/**
+	 *	Holds callback functions that let the child
+	 * class 'observe' what's going on and act on
+	 * triggers in during the file generation, allowing
+	 * them to customize the 'generate' method.
+	 */
+	protected $before_replace_vars	= array();
+	protected $after_replace_vars	= array();
 
 	/**
 	 * The core database tables that we can ignore...
@@ -244,6 +253,9 @@ class BF_Generator {
 		// the generator of info to replace.
 		$vars = $this->get_vars($params);
 
+		// Add a couple of utility vars for global use
+		$vars['module_lower'] = strtolower($vars['module']);
+
 		$files = $this->determine_files($params['module'], $params);
 
 		$results = array();
@@ -256,8 +268,12 @@ class BF_Generator {
 			$filename = $this->replace_vars($file['filename'], $vars);
 
 			$tpl = $this->load_template($file['template'], $this->name);
+			
+			$tpl = $this->trigger('before_replace_vars', array('filename'=>$filename, 'tpl'=>$tpl, 'vars'=>$vars));
 
 			$tpl = $this->replace_vars($tpl, $vars);
+			
+			$tpl = $this->trigger('after_replace_vars', array('filename'=>$filename, 'tpl'=>$tpl, 'vars'=>$vars));
 
 			$results[] = $this->write_file($file['path'], $file['filename'], $tpl);
 		}
@@ -266,6 +282,53 @@ class BF_Generator {
 	}
 
 	//--------------------------------------------------------------------
+
+	/**
+	 * Retrieves any custom fields from, for example, database tables
+	 * that we're pulling information from. 
+	 */
+	protected function get_vars($params)
+	{
+		$fields = null;
+		
+		foreach ($_POST as $key => $values)
+		{
+			if ($key == 'fields')
+			{
+				// Make sure our $fields is an array
+				if (!is_array($fields))
+				{
+					$fields = array();
+				}
+				
+				foreach ($values as $name => $val)
+				{
+					
+					if (isset($_POST['rules-'. $name]))
+					{
+						$rules = array();
+						foreach ($_POST['rules-'. $name] as $k => $v)
+						{
+							$rules[] = $k;
+						}
+						$rules = implode('|', $rules);
+					}
+					else
+					{
+						$rules = '';
+					}
+				
+					$fields[$name] = array(
+						'field_type'	=> strtolower($_POST['inputs'][$name]),
+						'display_name'	=> $_POST['names'][$name],
+						'rules'			=> $rules,
+					);
+				}
+			}
+		}
+
+		return $fields;
+	}
 
 	//--------------------------------------------------------------------
 	// !Private Methods
@@ -290,7 +353,10 @@ class BF_Generator {
 
 		foreach ($vars as $key => $value)
 		{
-			$str = str_ireplace('{'. $key .'}', $value, $str);
+			if (is_string($value))
+			{
+				$str = str_ireplace('{'. $key .'}', $value, $str);
+			}
 		}
 
 		return $str;
@@ -432,6 +498,8 @@ class BF_Generator {
 				// Display the list of contexts - does not allow creating new ones.
 				case 'context':
 					$contexts = $this->ci->config->item('contexts');
+					
+					$contexts[] = 'Public';
 
 					$form .= '<div class="control-group">';
 					$form .= '<label class="control-label">'. $options['display_name'] .'</label>';
@@ -623,12 +691,6 @@ class BF_Generator {
 		{
 			mkdir($path, 0755, true);
 		}
-/*
-		if (is_file($path . $filename))
-		{
-			$results[$path . $filename] = 'EXISTS';
-		}
- */
 		else if (write_file($path . $filename, $content, 'w'))
 		{
 			if ($exists)
@@ -650,4 +712,34 @@ class BF_Generator {
 
 	//--------------------------------------------------------------------
 
+	/**
+	 * Triggers a model-specific event and call each of it's observers.
+	 *
+	 * @param string 	$event 	The name of the event to trigger
+	 * @param mixed 	$data 	The data to be passed to the callback functions.
+	 *
+	 * @return mixed
+	 */
+	public function trigger($event, $data=false)
+	{
+		if (!isset($this->$event) || !is_array($this->$event))
+		{
+			return $data;
+		}
+
+		foreach ($this->$event as $method)
+		{
+			if (strpos($method, '('))
+			{
+				preg_match('/([a-zA-Z0-9\_\-]+)(\(([a-zA-Z0-9\_\-\., ]+)\))?/', $method, $matches);
+				$this->callback_parameters = explode(',', $matches[3]);
+			}
+
+			$data = call_user_func_array(array($this, $method), array($data));
+		}
+
+		return $data;
+	}
+
+	//--------------------------------------------------------------------
 }

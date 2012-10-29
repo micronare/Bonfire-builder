@@ -13,20 +13,81 @@ class {context_ucf} extends {extend} {
 	public function __construct()
 	{
 		parent::__construct();
+
+		$this->load->model('{module_lower}_model');
+
+		$this->lang->load('{module_lower}');
 	}
 
 	//--------------------------------------------------------------------
 
+	/**
+	 * Displays a list of the items.
+	 *
+	 * @return void
+	 */
 	public function index()
 	{
+		// Deleting anything?
+		if ($this->input->post('delete'))
+		{
+			$checked = $this->input->post('checked');
 
+			if (is_array($checked) && count($checked))
+			{
+				$result = FALSE;
+
+				foreach ($checked as $pid)
+				{
+					$result = $this->{module_lower}_model->delete($pid);
+				}
+
+				if ($result)
+				{
+					Template::set_message(count($checked) .' '. lang('{module_lower}_delete_success'), 'success');
+				}
+				else
+				{
+					Template::set_message(lang('{module_lower}_delete_failure') . $this->{module_lower}_model->error, 'error');
+				}
+			}
+		}
+
+		Template::set('records', $this->{module_lower}_model->find_all() );
+
+		Template::set('toolbar_title', 'Manage {module}');
+		Template::render();
 	}
 
 	//--------------------------------------------------------------------
 
+	/**
+	 * Create a {module} item.
+	 *
+	 * @return void
+	 */
 	public function create()
 	{
 		$this->auth->restrict();
+
+		if ($this->input->post('save'))
+		{
+			if ($insert_id = $this->save())
+			{
+				// Log the activity
+				$this->activity_model->log_activity($this->current_user->id, lang('{module_lower}_act_create_record') .': '. $insert_id .' : '. $this->input->ip_address(), '{module_lower}' );
+
+				Template::set_message( lang('{module_lower}_create_success'), 'success');
+				redirect(SITE_AREA .'/{context}/{module_lower}');
+			}
+			else
+			{
+				Template::set_message( lang('{module_lower}_create_failure'), 'error');
+			}
+		}
+
+		Template::set('toolbar_title', lang('{module_lower}_create') .' {module}');
+		Template::render();
 	}
 
 	//--------------------------------------------------------------------
@@ -50,7 +111,8 @@ class {context_ucf} extends {extend} {
 	//--------------------------------------------------------------------
 
 	/**
-	 * Validates and saves the data.
+	 * Validates and saves the data. The data to work with must be available
+	 * via the CodeIgniter input->post() method.
 	 *
 	 * @param  string $type Operation type. Either 'insert' or 'update'
 	 * @param  INT $id   The primary key of the record to update. Not needed
@@ -58,11 +120,43 @@ class {context_ucf} extends {extend} {
 	 *
 	 * @access private
 	 *
-	 * @return bool
+	 * @return An INT ID for successful inserts. If updating returns TRUE on success.
+	 *         Otherwise, returns FALSE.
 	 */
 	private function save($type='insert', $id=null)
 	{
+		if ($type == 'update') {
+			$_POST['{$primary_key_field}'] = \$id;
+		}
 
+{validation_rules}
+
+		if ($this->form_validation->run() === FALSE)
+		{
+			return FALSE;
+		}
+
+		// make sure we only pass in the fields we want
+{save_data_array}
+
+		if ($type == 'insert')
+		{
+			$id = $this->{$module_lower}_model->insert($data);
+
+			if (is_numeric($id))
+			{
+				$return = $id;
+			} else
+			{
+				$return = FALSE;
+			}
+		}
+		else if ($type == 'update')
+		{
+			$return = $this->{$module_lower}_model->update($id, $data);
+		}
+
+		return $return;
 	}
 
 	//--------------------------------------------------------------------

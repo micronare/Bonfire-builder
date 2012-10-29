@@ -9,5 +9,14 @@ $(document).ready(function(){
 			'/admin/developer/builder/render_db_to_form/' + _table
 		);
 	});
+	
+	//--------------------------------------------------------------------
+	
+	// DB Table Rules Button...
+	$('.rule-button').live('click', function(e){
+		e.preventDefault();
+		
+		$(this).parent().parent().next('.rule-list').toggle();
+	});
 
 });

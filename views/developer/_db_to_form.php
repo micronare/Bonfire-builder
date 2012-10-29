@@ -1,3 +1,11 @@
+<style type="text/css">
+.rule-list label.checkbox {
+	display: inline-block;
+	width: 20% !important;
+}
+.rule-list { display: none; }
+</style>
+
 <br/>
 
 <?php if (isset($fields) && is_array($fields) && count($fields)) : ?>
@@ -8,7 +16,9 @@
 			<tr>
 				<th></th>
 				<th>Field</th>
+				<th>Display Name</th>
 				<th>Input Type</th>
+				<th>Rules</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -25,6 +35,9 @@
 					<input type="checkbox" name="fields[<?php echo $field->name ?>]" value="1" <?php echo set_checkbox('inputs['. $field->name .']', 1, $checked_default); ?> />
 				</td>
 				<td><?php e($field->name) ?></td>
+				<td>
+					<input type="input" class="input-medium" name="names[<?php echo $field->name ?>]" value="<?php echo set_value('names['. $field->name .']', ucwords(str_replace('_', ' ', $field->name))) ?>" />
+				</td>
 				<td>
 					<?php
 						$datetime_default 	= in_array($field->name, array('created_on', 'modified_on', 'deleted_on'));
@@ -47,6 +60,23 @@
 						<option <?php echo set_select('inputs['. $field->name .']', 'Range'); ?>>Range</option>
 						<option <?php echo set_select('inputs['. $field->name .']', 'Textarea'); ?>>Textarea</option>
 					</select>
+				</td>
+				<td>
+				<a class="btn rule-button" href="#">Rules...</a>
+				</td>
+			</tr>
+			<tr class="rule-list">
+				<td colspan="5">
+				<?php if (isset($allowed_rules) && is_array($allowed_rules)) :?>
+						
+					<?php foreach ($allowed_rules as $rule) :?>
+						<label class="checkbox">
+							<input type="checkbox" name="rules-<?php echo $field->name .'['. $rule .']' ?>" value="1" /> 
+							<?php echo $rule ?>
+						</label>
+					<?php endforeach; ?>
+					
+				<?php endif; ?>
 				</td>
 			</tr>
 		<?php endforeach; ?>

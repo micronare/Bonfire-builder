@@ -92,16 +92,64 @@ class {context_ucf} extends {extend} {
 
 	//--------------------------------------------------------------------
 
+	/**
+	 *	Allows editing of {module} data.
+	 */
 	public function edit($id)
 	{
 		$this->auth->restrict();
-	}
+		
+		$id = $this->uri->segment(5);
 
-	//--------------------------------------------------------------------
+		if (empty($id))
+		{
+			Template::set_message(lang('{module_lower}_invalid_id'), 'error');
+			redirect(SITE_AREA .'/{context}."/{module_lower}');
+		}
 
-	public function delete($id)
-	{
-		$this->auth->restrict();
+		// Saving?
+		if (isset($_POST['save']))
+		{
+			$this->auth->restrict('{edit_permission}');
+
+			if ($this->save_".$module_name_lower."('update', $id))
+			{
+				// Log the activity
+				$this->activity_model->log_activity($this->current_user->id, lang('{module_lower}_act_edit_record').': '. $id .' : '. $this->input->ip_address(), '{module_lower}');
+
+				Template::set_message(lang('{module_lower}_edit_success'), 'success');
+			}
+			else
+			{
+				Template::set_message(lang('{module_lower}_edit_failure') . $this->{module_lower}_model->error, 'error');
+			}
+		}
+		
+		// Deleting?
+		else if (isset($_POST['delete']))
+		{
+			$this->auth->restrict('{delete_permission}');
+
+			if ($this->{module_lower}_model->delete($id))
+			{
+				// Log the activity
+				$this->activity_model->log_activity($this->current_user->id, lang('{module_lower}_act_delete_record').': ' . $id . ' : ' . $this->input->ip_address(), '{module_lower}');
+
+				Template::set_message(lang('{module_lower}_delete_success'), 'success');
+
+				redirect(SITE_AREA .'/{context}/{module_lower}');
+			} else
+			{
+				Template::set_message(lang('{module_name_lower}_delete_failure') . $this->{module_lower}_model->error, 'error');
+			}
+		}
+
+		Template::set('{module_lower}', $this->{module_lower}_model->find($id));
+
+		Assets::add_module_js('{module_lower}', '{module_lower}.js');
+
+		Template::set('toolbar_title', lang('{module_lower}_edit') . ' {module_name}.');
+		Template::render();
 	}
 
 	//--------------------------------------------------------------------

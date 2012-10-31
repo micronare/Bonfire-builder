@@ -11,9 +11,9 @@ class Crud_Generator extends BF_Generator {
 		'delete'		=> 'crud_delete.php',
 		'list'			=> 'crud_list.php'
 	);
-	
+
 	protected $before_replace_vars 	= array();
-	protected $after_replace_vars	= array('render_validation_rules', 'render_save_data_array');
+	protected $after_replace_vars	= array('render_validation_rules');
 
 	// Our form fields and validation needs
 	protected $fields	= array(
@@ -68,7 +68,7 @@ class Crud_Generator extends BF_Generator {
 			'context_ucf'	=> ucfirst($params['context']),
 			'extend'		=> $params['context'] != 'public' ? 'Admin_Controller' : 'Front_Controller',
 		);
-		
+
 		$vars['fields']	= parent::get_vars($params);
 
 		return $vars;
@@ -76,34 +76,25 @@ class Crud_Generator extends BF_Generator {
 
 	//--------------------------------------------------------------------
 
-	public function render_validation_rules($params) 
+	public function render_validation_rules($params)
 	{
 		$filename	= isset($params['filename']) ? $params['filename'] : '';
 		$tpl		= isset($params['tpl']) ? $params['tpl'] : '';
 		$vars		= isset($params['vars']) ? $params['vars'] : '';
-	
+
 		$rules = '';
-		
-		foreach ($vars['fields'] as $fieldname => $opts)
+
+		if (isset($vars['fields']) && is_array($vars['fields']))
 		{
-			$rules .= "\t\t\$this->form_validation->set_rules('{$fieldname}', '{$opts['display_name']}', '{$opts['rules']}');\n";
+			foreach ($vars['fields'] as $fieldname => $opts)
+			{
+				$rules .= "\t\t\$this->form_validation->set_rules('{$fieldname}', '{$opts['display_name']}', '{$opts['rules']}');\n";
+			}
 		}
-		
-		$tpl = str_replace('{validation_rules}', $rules, $tpl);
-	
-		return $tpl;
+
+		$this->tpl = str_replace('{validation_rules}', $rules, $tpl);
 	}
-	
+
 	//--------------------------------------------------------------------
-	
-	public function render_save_data_array($params) 
-	{
-		$filename	= isset($params['filename']) ? $params['filename'] : '';
-		$tpl		= isset($params['tpl']) ? $params['tpl'] : '';
-		$vars		= isset($params['vars']) ? $params['vars'] : '';
-		
-		return $tpl;
-	}
-	
-	//--------------------------------------------------------------------
+
 }

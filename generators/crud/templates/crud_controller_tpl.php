@@ -98,7 +98,7 @@ class {context_ucf} extends {extend} {
 	public function edit($id)
 	{
 		$this->auth->restrict();
-		
+
 		$id = $this->uri->segment(5);
 
 		if (empty($id))
@@ -124,7 +124,7 @@ class {context_ucf} extends {extend} {
 				Template::set_message(lang('{module_lower}_edit_failure') . $this->{module_lower}_model->error, 'error');
 			}
 		}
-		
+
 		// Deleting?
 		else if (isset($_POST['delete']))
 		{
@@ -174,7 +174,7 @@ class {context_ucf} extends {extend} {
 	private function save($type='insert', $id=null)
 	{
 		if ($type == 'update') {
-			$_POST['{$primary_key_field}'] = \$id;
+			$_POST['{$primary_key_field}'] = $id;
 		}
 
 {validation_rules}
@@ -185,7 +185,8 @@ class {context_ucf} extends {extend} {
 		}
 
 		// make sure we only pass in the fields we want
-{save_data_array}
+		$data = $this->input->post();
+		if (isset($data['submit'])) unset($data['submit']);
 
 		if ($type == 'insert')
 		{

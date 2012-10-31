@@ -82,13 +82,22 @@ class BF_Generator {
 	protected $self_path;
 
 	/**
+	 * A placeholder for the template as it's being processed.
+	 * This provides a way for every method to access it without
+	 * worry of the trail.
+	 *
+	 * @var string
+	 */
+	protected $tpl = '';
+
+	/**
 	 * A pointer to the CI superglobal.
 	 *
 	 * @access protected
 	 * @var Object
 	 */
 	protected $ci;
-	
+
 	/**
 	 *	Holds callback functions that let the child
 	 * class 'observe' what's going on and act on
@@ -267,15 +276,15 @@ class BF_Generator {
 			// Replaces info in filename with any of the generator vars.
 			$filename = $this->replace_vars($file['filename'], $vars);
 
-			$tpl = $this->load_template($file['template'], $this->name);
-			
-			$tpl = $this->trigger('before_replace_vars', array('filename'=>$filename, 'tpl'=>$tpl, 'vars'=>$vars));
+			$this->tpl = $this->load_template($file['template'], $this->name);
 
-			$tpl = $this->replace_vars($tpl, $vars);
-			
-			$tpl = $this->trigger('after_replace_vars', array('filename'=>$filename, 'tpl'=>$tpl, 'vars'=>$vars));
+			$this->trigger('before_replace_vars', array('filename'=>$filename, 'tpl'=>$this->tpl, 'vars'=>$vars));
 
-			$results[] = $this->write_file($file['path'], $file['filename'], $tpl);
+			$this->tpl = $this->replace_vars($this->tpl, $vars);
+
+			$this->trigger('after_replace_vars', array('filename'=>$filename, 'tpl'=>$this->tpl, 'vars'=>$vars));
+//die('<pre>'. print_r($this->tpl, true));
+			$results[] = $this->write_file($file['path'], $file['filename'], $this->tpl);
 		}
 
 		return $results;
@@ -285,12 +294,12 @@ class BF_Generator {
 
 	/**
 	 * Retrieves any custom fields from, for example, database tables
-	 * that we're pulling information from. 
+	 * that we're pulling information from.
 	 */
 	protected function get_vars($params)
 	{
 		$fields = null;
-		
+
 		foreach ($_POST as $key => $values)
 		{
 			if ($key == 'fields')
@@ -300,10 +309,10 @@ class BF_Generator {
 				{
 					$fields = array();
 				}
-				
+
 				foreach ($values as $name => $val)
 				{
-					
+
 					if (isset($_POST['rules-'. $name]))
 					{
 						$rules = array();
@@ -317,7 +326,7 @@ class BF_Generator {
 					{
 						$rules = '';
 					}
-				
+
 					$fields[$name] = array(
 						'field_type'	=> strtolower($_POST['inputs'][$name]),
 						'display_name'	=> $_POST['names'][$name],
@@ -498,7 +507,7 @@ class BF_Generator {
 				// Display the list of contexts - does not allow creating new ones.
 				case 'context':
 					$contexts = $this->ci->config->item('contexts');
-					
+
 					$contexts[] = 'Public';
 
 					$form .= '<div class="control-group">';
@@ -691,7 +700,8 @@ class BF_Generator {
 		{
 			mkdir($path, 0755, true);
 		}
-		else if (write_file($path . $filename, $content, 'w'))
+
+		if (write_file($path . $filename, $content, 'w'))
 		{
 			if ($exists)
 			{

@@ -264,6 +264,13 @@ class BF_Generator {
 
 		// Add a couple of utility vars for global use
 		$vars['module_lower'] = strtolower($vars['module']);
+		$vars['module_ucw']	= ucwords(str_replace('_', ' ', $vars['module']));
+
+		// Permissions
+		$vars['delete_permission'] 	= preg_replace("/[ -]/", '_', ucfirst($vars['module']) .'.'. ucfirst($vars['context']) .'.Delete');
+		$vars['edit_permission'] 	= preg_replace("/[ -]/", '_', ucfirst($vars['module']) .'.'. ucfirst($vars['context']) .'.Edit');
+		$vars['view_permission'] 	= preg_replace("/[ -]/", '_', ucfirst($vars['module']) .'.'. ucfirst($vars['context']) .'.View');
+
 
 		$files = $this->determine_files($params['module'], $params);
 
@@ -278,11 +285,11 @@ class BF_Generator {
 
 			$this->tpl = $this->load_template($file['template'], $this->name);
 
-			$this->trigger('before_replace_vars', array('filename'=>$filename, 'tpl'=>$this->tpl, 'vars'=>$vars));
+			$this->trigger('before_replace_vars', array('filename'=>$filename, 'vars'=>$vars));
 
 			$this->tpl = $this->replace_vars($this->tpl, $vars);
 
-			$this->trigger('after_replace_vars', array('filename'=>$filename, 'tpl'=>$this->tpl, 'vars'=>$vars));
+			$this->trigger('after_replace_vars', array('filename'=>$filename, 'vars'=>$vars));
 //die('<pre>'. print_r($this->tpl, true));
 			$results[] = $this->write_file($file['path'], $file['filename'], $this->tpl);
 		}
@@ -414,13 +421,18 @@ class BF_Generator {
 			}
 
 			/*
-				Alternatively, check for the {context} tag and replace it in the name
+				Alternatively, check for the {context} and {module} tags and replace them in the name
 				for context controllers.
 			 */
 			if ($this->ci->input->post('context'))
 			{
 				$name = str_replace('{context}', $this->ci->input->post('context'), $name);
 				$options['folder'] = str_replace('{context}', $this->ci->input->post('context'), $options['folder']);
+			}
+			if ($this->ci->input->post('module'))
+			{
+				$name = str_replace('{module}', $this->ci->input->post('module'), $name);
+				$options['folder'] = str_replace('{module}', $this->ci->input->post('module'), $options['folder']);
 			}
 
 			$path = str_replace('application/', '', APPPATH) .'modules/'. $module .'/'. $options['folder'] .'/';
@@ -745,7 +757,7 @@ class BF_Generator {
 				$this->callback_parameters = explode(',', $matches[3]);
 			}
 
-			$data = call_user_func_array(array($this, $method), array($data));
+			call_user_func_array(array($this, $method), array($data));
 		}
 
 		return $data;
